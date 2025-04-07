@@ -1,8 +1,8 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
+
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -38,6 +38,25 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        self.items.push(value);
+
+        let mut current_idx = self.count;
+
+        while current_idx > 1 {
+            let parent_idx = self.parent_idx(current_idx);
+
+            // 如果当前元素比父节点更"优先"（通过比较器函数确定）
+            if (self.comparator)(&self.items[current_idx], &self.items[parent_idx]) {
+                // 交换当前元素和父节点
+                self.items.swap(current_idx, parent_idx);
+                // 更新当前索引继续向上比较
+                current_idx = parent_idx;
+            } else {
+                // 如果不需要交换，说明已经找到正确位置
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +76,23 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        // if !self.children_present(idx) {
+        //     return left_idx;
+        // }
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+
+        // 如果右子节点不存在，直接返回左子节点
+        if right_idx > self.count {
+            return left_idx;
+        }
+
+        // 使用比较器函数来确定哪个子节点更"优先"
+        if (self.comparator)(&self.items[left_idx], &self.items[right_idx]) {
+            left_idx
+        } else {
+            right_idx
+        }
     }
 }
 
@@ -85,7 +119,25 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        let current_idx = 1;
+        let final_idx = self.count;
+        if final_idx == 0 {
+            return None;
+        }
+        self.items.swap(current_idx, final_idx);
+        self.count -= 1;
+        let result = self.items.pop();
+        let mut current_idx = 1;
+        while self.children_present(current_idx) {
+            let child_idx = self.smallest_child_idx(current_idx);
+            if (self.comparator)(&self.items[child_idx], &self.items[current_idx]) {
+                self.items.swap(current_idx, child_idx);
+                current_idx = child_idx;
+            } else {
+                break;
+            }
+        }
+        result
     }
 }
 
